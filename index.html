@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>swide</title>
+    <title>sw-editor</title>
     <style media="screen">
       body {
         font-family: sans-serif;
@@ -33,26 +33,49 @@
     </style>
   </head>
   <body>
-    <h1>swide</h1>
+    <h1>sw-editor</h1>
 
     <form id="add">
-      <input id="path" name="path">
+      <input id="path" name="path" placeholder="/foo.html">
+      <select id="type">
+        <option value="text/html">html</option>
+        <option value="script/javascript">js</option>
+        <option value="text/css">css</option>
+        <option value="text/text">text</option>
+      </select>
       <button>+</button>
     </form>
 
     <script type="text/javascript">
 
-      function addFile(path, content) {
+    navigator.serviceWorker.register('/sw.js')
+    // yup
+    var worker = new Worker('sw.js')
+    //
+    // worker.postMessage({
+    //   path: '/index.html',
+    //   body: 'FOOOOOO!',
+    //   type: 'text/plain'
+    // })
+
+
+    // addFile('foo')
+    //
+    // addFile('bar', 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.', 'text/plain')
+
+      function addFile(path, content, type) {
 
         var input;
 
         var f = el('fieldset', [
           el('button', [text('×')], {onclick: rm}),
           el('legend', [text(path)]),
-          input = el('textarea',[], {onchange: update})
+          input = el('textarea',[], {onchange: update, rows:8})
         ])
 
         document.body.appendChild(f)
+
+        if(content) input.value = content
 
         input.focus()
 
@@ -62,26 +85,29 @@
         }
 
         function update() {
-          // send to worker
-          console.log(">>>", this.value)
+
+          worker.postMessage({
+            path: path,
+            body: this.value,
+            type: type
+          })
+
         }
 
       }
 
       add.onsubmit = function(e){
         e.preventDefault()
-        addFile(path.value)
+        addFile(path.value, '', type.value)
         path.value = ''
       }
 
-      // yup
-      // var worker = new Worker('sw.js')
-      // worker.postMessage('hello')
+
 
 
       // realDOM™
       function el(name, children, props) {
-        
+
         var element = document.createElement(name)
 
         if(children)
