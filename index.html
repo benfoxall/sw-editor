@@ -48,20 +48,7 @@
 
     <script type="text/javascript">
 
-    navigator.serviceWorker.register('/sw.js')
-    // yup
-    var worker = new Worker('sw.js')
-    //
-    // worker.postMessage({
-    //   path: '/index.html',
-    //   body: 'FOOOOOO!',
-    //   type: 'text/plain'
-    // })
-
-
-    // addFile('foo')
-    //
-    // addFile('bar', 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.', 'text/plain')
+      navigator.serviceWorker.register('/sw.js')
 
       function addFile(path, content, type) {
 
@@ -81,17 +68,12 @@
 
 
         function rm() {
+          remove(path)
           document.body.removeChild(f)
         }
 
         function update() {
-
-          worker.postMessage({
-            path: path,
-            body: this.value,
-            type: type
-          })
-
+          put(path, this.value, type)
         }
 
       }
@@ -126,6 +108,66 @@
       function text(str){
         return document.createTextNode(str)
       }
+
+
+
+      // Storage
+      // todo - something reduxy and idb based would
+      // be a better way of structuring this to allow
+      // follow along and history
+
+
+      // initial list
+
+      // this feels horrible.
+      caches.open('content').then(function(cache) {
+        cache.keys()
+          .then(function(requests) {
+            requests.forEach(function(request) {
+              cache.match(request)
+                .then(function(response){
+                  response.text()
+                    .then(function(text){
+                      addFile(
+                        relative(request.url),
+                        text,
+                        response.headers.get('Content-Type')
+                      )
+                    })
+                })
+            })
+          })
+      })
+
+
+      function relative(url) {
+        return url.split(location.origin)
+            .filter(function(d) {return d})
+            [0]
+      }
+
+
+      function put(path, body, type) {
+        caches.open('content')
+          .then(function(cache) {
+            cache.put(path, new Response(body, {
+              headers: {
+                'Content-Type': type
+              }
+            }))
+          })
+      }
+
+      function remove(path) {
+        caches.open('content')
+          .then(function(cache) {
+            cache.delete(path)
+          })
+      }
+
+
+
+
     </script>
 
   </body>
