@@ -6,45 +6,140 @@
     <style media="screen">
       body {
         font-family: sans-serif;
+        -webkit-font-smoothing: antialiased;
       }
       * {
         box-sizing: border-box;
       }
-      label, textarea{
-        display: block
+
+      body {
+        margin: 0;
       }
-      fieldset {
-        border: none;
-        border-radius: 3px;
-        padding:.4em;
-        position: relative;
-        box-shadow: rgba(0,0,0,0.2) 2px 3px 10px;
-        margin:1em;
+
+      #files {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      #files a {
+        color: #000;
+        text-decoration: none;
+        display: block;
+        padding: .5rem 1rem;
+        font-weight: 800;
+        transition: .2s;
+      }
+
+      #files a:hover {
+        background: #000;
+        color: #fff;
+      }
+
+      #new-file a {
+        display: inline-block;
+      }
+
+      #add {
+        border-bottom: 1px solid #000;
+        padding:1em 0;
+        padding: .5rem 1rem;
+        margin-bottom: 1em;
+      }
+      label {
+        display: block;
+        margin-bottom: .2em;
+      }
+      input, select {
+        display: block;
+        margin-bottom: 1em;
+        font-size: 1em;
+      }
+
+
+      #main {
+        display: flex;
+        height: 100vh;
+      }
+      #content {
+        border-left: 1px solid #000;
+        display: flex;
+        flex-flow: column;
+        flex:1;
+      }
+      h1 {
+        padding: 1rem;
+        margin: 0;
+        border-bottom: 1px solid #000;
+      }
+      h1 small {
+        font-size: .4em;
+      }
+      .rm {
+        float:right;
+        text-decoration: none;
+        font-size: .4em;
+        color: #000;
+      }
+      .rm:hover{
+        color: red;
       }
       textarea {
+        font-family: Andale Mono, monospace;
+        font-size: 1.2em;
         border: none;
-        margin:0;
-        border-radius: 3px;
-        width: 100%;
+        display: block;
+        flex: 1;
+        padding: 1rem;
       }
-      form {
-        margin:1em
-      }
+
     </style>
   </head>
   <body>
-    <h1>sw-editor</h1>
 
-    <form id="add">
-      <input id="path" name="path" placeholder="/foo.html">
-      <select id="type">
-        <option value="text/html">html</option>
-        <option value="script/javascript">js</option>
-        <option value="text/css">css</option>
-        <option value="text/text">text</option>
-      </select>
-      <button>+</button>
-    </form>
+    <div id="main">
+      <ul id="files">
+        <li>
+          <a href="#" id="addToggle">+</a>
+          <form id="add" style="display:none">
+            <label for="path">
+              path
+            </label>
+            <input id="path" name="path" placeholder="/foo.html">
+            <label for="type">
+              content-type
+            </label>
+            <select id="type" name="type">
+              <option value="text/html">html</option>
+              <option value="script/javascript">js</option>
+              <option value="text/css">css</option>
+              <option value="text/plain">text</option>
+            </select>
+            <input id="submit" type="submit" name="" value="create new file">
+          </form>
+        </li>
+
+        <li><a href="#">/one.html</a></li>
+        <li><a href="#">/two.html</a></li>
+        <li><a href="#">/three.html</a></li>
+
+      </ul>
+
+      <div id="content">
+        <h1>/script.js
+          <small>application/javascript</small>
+          <a href="#" class="rm">delete</a>
+        </h1>
+
+        <textarea>add.onsubmit = function(e){
+  e.preventDefault()
+  addFile(path.value, '', type.value)
+  path.value = ''
+}
+</textarea>
+
+      </div>
+    </div>
 
     <script type="text/javascript">
 
@@ -64,7 +159,7 @@
 
         if(content) input.value = content
 
-        input.focus()
+        // input.focus()
 
 
         function rm() {
@@ -82,6 +177,17 @@
         e.preventDefault()
         addFile(path.value, '', type.value)
         path.value = ''
+        add.style.display = 'none'
+      }
+      addToggle.onclick = function(e){
+        e.preventDefault()
+
+        add.style.display =
+          add.style.display == 'block' ?
+            'none' : 'block'
+
+        if(add.style.display == 'block')
+          path.focus()
       }
 
 
@@ -164,7 +270,6 @@
             cache.delete(path)
           })
       }
-
 
 
 
