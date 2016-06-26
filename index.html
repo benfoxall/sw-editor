@@ -122,12 +122,12 @@
       </ul>
 
       <div id="content">
-        <h1>/script.js
-          <small>application/javascript</small>
+        <h1><span id="file_path">/script.js</span>
+          <small id="file_type">application/javascript</small>
           <a href="#" class="rm">delete</a>
         </h1>
 
-        <textarea>add.onsubmit = function(e){
+        <textarea id="file_body">add.onsubmit = function(e){
   e.preventDefault()
   addFile(path.value, '', type.value)
   path.value = ''
@@ -143,11 +143,19 @@
 
       var store = rstore(function(state, action) {
         if (typeof state == 'undefined')
-          return {files: []}
+          return {files: [], current: null}
 
         if(action.action == 'ADD') {
           return {
-            files: [action.file].concat(state.files)
+            files: [action.file].concat(state.files),
+            file: state.file
+          }
+        }
+
+        if(action.action == 'EDIT') {
+          return {
+            files: state.files,
+            file: action.file
           }
         }
       })
@@ -155,6 +163,11 @@
       store.subscribe(function(state, previous){
         if(state.files !== previous.files) {
           renderFiles(state)
+        }
+        if(state.file) {
+          file_path.innerText = state.file.path
+          file_type.innerText = state.file.type
+          file_body.innerText = state.file.body
         }
       })
 
@@ -199,7 +212,14 @@
 
         state.files.forEach(function(f){
           files.appendChild(
-            el('li', [el('a', [text(f.path)])])
+            el('li', [el('a', [text(f.path)])], {
+              onclick: function(e){
+                store({
+                  action: 'EDIT',
+                  file: f
+                })
+              }
+            })
           )
         })
       }
@@ -256,8 +276,8 @@
                           body: text
                         }
                       })
-
                     })
+
                 })
             })
           })
