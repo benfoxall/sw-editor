@@ -169,6 +169,28 @@
         }
 
 
+
+        if(action.action == 'SAVE') {
+
+          if(state.file) {
+            put(state.file.path, action.body, state.file.type)
+            var f2 = {
+              path: state.file.path,
+              body: action.body,
+              type: state.file.type
+            }
+          }
+
+          return {
+            files: state.files.map(function(f){
+              return f.path === state.file.path ?
+                f2 : f
+            }),
+            file: f2
+          }
+        }
+
+
       })
 
       store.subscribe(function(state, previous){
@@ -217,6 +239,13 @@
         })
       }
 
+      file_body.onchange = function(e){
+        store({
+          action: 'SAVE',
+          body: file_body.value
+        })
+      }
+
 
       function renderFiles(state) {
 
@@ -243,12 +272,12 @@
         if(state.file) {
           file_path.innerText = state.file.path
           file_type.innerText = state.file.type
-          file_body.innerText = state.file.body
+          file_body.value = state.file.body
           file_delete.style.display = 'block'
         } else {
           file_path.innerText = '_'
           file_type.innerText = '_'
-          file_body.innerText = ''
+          file_body.value = ''
           file_delete.style.display = 'none'
 
         }
