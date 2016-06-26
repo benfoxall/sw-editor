@@ -119,10 +119,6 @@
           </form>
         </li>
 
-        <li><a href="#">/one.html</a></li>
-        <li><a href="#">/two.html</a></li>
-        <li><a href="#">/three.html</a></li>
-
       </ul>
 
       <div id="content">
@@ -145,40 +141,27 @@
 
       navigator.serviceWorker.register('/sw.js')
 
-      function addFile(path, content, type) {
-
-        var input;
-
-        var f = el('fieldset', [
-          el('button', [text('×')], {onclick: rm}),
-          el('legend', [text(path)]),
-          input = el('textarea',[], {onchange: update, rows:8})
-        ])
-
-        document.body.appendChild(f)
-
-        if(content) input.value = content
-
-        // input.focus()
-
-
-        function rm() {
-          remove(path)
-          document.body.removeChild(f)
-        }
-
-        function update() {
-          put(path, this.value, type)
-        }
-
+      var state = {
+        files:[]
       }
 
       add.onsubmit = function(e){
         e.preventDefault()
-        addFile(path.value, '', type.value)
+
+        put(path.value, '-', type.value)
+
+        state.files.push({
+          path: path.value,
+          type: type.value,
+          body: '-'
+        })
+
+        renderFiles(state)
+
         path.value = ''
         add.style.display = 'none'
       }
+
       addToggle.onclick = function(e){
         e.preventDefault()
 
@@ -190,6 +173,21 @@
           path.focus()
       }
 
+
+      function renderFiles(state) {
+
+        // remove existing files
+        var adder = files.firstElementChild
+        while(adder.nextSibling) {
+          adder.nextSibling.remove()
+        }
+
+        state.files.forEach(function(f){
+          files.appendChild(
+            el('li', [el('a', [text(f.path)])])
+          )
+        })
+      }
 
 
 
@@ -234,11 +232,15 @@
                 .then(function(response){
                   response.text()
                     .then(function(text){
-                      addFile(
-                        relative(request.url),
-                        text,
-                        response.headers.get('Content-Type')
-                      )
+
+                      state.files.push({
+                        path: relative(request.url),
+                        type: response.headers.get('Content-Type'),
+                        body: text
+                      })
+
+                      renderFiles(state)
+
                     })
                 })
             })
