@@ -124,15 +124,10 @@
       <div id="content">
         <h1><span id="file_path">/script.js</span>
           <small id="file_type">application/javascript</small>
-          <a href="#" class="rm">delete</a>
+          <a id="file_delete" href="#" class="rm">delete</a>
         </h1>
 
-        <textarea id="file_body">add.onsubmit = function(e){
-  e.preventDefault()
-  addFile(path.value, '', type.value)
-  path.value = ''
-}
-</textarea>
+        <textarea id="file_body"></textarea>
 
       </div>
     </div>
@@ -148,7 +143,7 @@
         if(action.action == 'ADD') {
           return {
             files: [action.file].concat(state.files),
-            file: state.file
+            file: state.file || action.file
           }
         }
 
@@ -158,16 +153,30 @@
             file: action.file
           }
         }
+
+        if(action.action == 'DELETE') {
+
+          if(state.file) {
+            remove(state.file.path)
+          }
+
+          return {
+            files: state.files.filter(function(f){
+              return f.path !== state.file.path
+            }),
+            file: null
+          }
+        }
+
+
       })
 
       store.subscribe(function(state, previous){
         if(state.files !== previous.files) {
           renderFiles(state)
         }
-        if(state.file) {
-          file_path.innerText = state.file.path
-          file_type.innerText = state.file.type
-          file_body.innerText = state.file.body
+        if(state.file !== previous.file) {
+          renderFile(state)
         }
       })
 
@@ -201,6 +210,13 @@
           path.focus()
       }
 
+      file_delete.onclick = function(e){
+        e.preventDefault()
+        store({
+          action: 'DELETE'
+        })
+      }
+
 
       function renderFiles(state) {
 
@@ -222,6 +238,20 @@
             })
           )
         })
+      }
+      function renderFile(state) {
+        if(state.file) {
+          file_path.innerText = state.file.path
+          file_type.innerText = state.file.type
+          file_body.innerText = state.file.body
+          file_delete.style.display = 'block'
+        } else {
+          file_path.innerText = '_'
+          file_type.innerText = '_'
+          file_body.innerText = ''
+          file_delete.style.display = 'none'
+
+        }
       }
 
 
@@ -285,7 +315,7 @@
 
 
       function relative(url) {
-        return url.split(location.origin)
+        return url.split(location.origin + '/')
             .filter(function(d) {return d})
             [0]
       }
