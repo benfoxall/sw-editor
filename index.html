@@ -141,22 +141,37 @@
 
       navigator.serviceWorker.register('/sw.js')
 
-      var state = {
-        files:[]
-      }
+      var store = rstore(function(state, action) {
+        if (typeof state == 'undefined')
+          return {files: []}
+
+        if(action.action == 'ADD') {
+          return {
+            files: [action.file].concat(state.files)
+          }
+        }
+      })
+
+      store.subscribe(function(state, previous){
+        if(state.files !== previous.files) {
+          renderFiles(state)
+        }
+      })
+
 
       add.onsubmit = function(e){
         e.preventDefault()
 
         put(path.value, '-', type.value)
 
-        state.files.push({
-          path: path.value,
-          type: type.value,
-          body: '-'
+        store({
+          action: 'ADD',
+          file: {
+            path: path.value,
+            type: type.value,
+            body: '-'
+          }
         })
-
-        renderFiles(state)
 
         path.value = ''
         add.style.display = 'none'
@@ -233,13 +248,14 @@
                   response.text()
                     .then(function(text){
 
-                      state.files.push({
-                        path: relative(request.url),
-                        type: response.headers.get('Content-Type'),
-                        body: text
+                      store({
+                        action: 'ADD',
+                        file: {
+                          path: relative(request.url),
+                          type: response.headers.get('Content-Type'),
+                          body: text
+                        }
                       })
-
-                      renderFiles(state)
 
                     })
                 })
@@ -273,6 +289,28 @@
           })
       }
 
+
+      // something to stub out redux while I'm on a plane
+      function rstore(reducer){
+        var subscribers = []
+        function subscribe(fn){
+          subscribers.push(fn)
+        }
+
+        var _state = reducer()
+
+        function act(action){
+          var _net = reducer(_state, action)
+          subscribers.forEach(function(s){
+            s(_net, _state)
+          })
+          _state = _net
+        }
+
+        act.subscribe = subscribe
+
+        return act
+      }
 
 
     </script>
