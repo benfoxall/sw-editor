@@ -10,18 +10,23 @@ self.addEventListener('fetch', function(event) {
 
 // Load default files on install
 self.addEventListener('install', function(event) {
+
+  var files = {
+    '_default/index.html': '/',
+    '_default/script.js':  '/script.js',
+    '_default/style.css':  '/style.css'
+  }
+
   event.waitUntil(
     // this could use cache.addAll, but we need to
     // map the requests
     caches.open('content').then(cache =>
-      Promise.all([
-        'index.html',
-        'script.js',
-        'style.css'
-      ].map( (file, i) =>
-        fetch('/_default/' + file)
+      Promise.all(
+        Object.keys(files)
+        .map( (source, i) =>
+        fetch(source)
           .then(resp =>
-            cache.put('/' + i ? file : '', resp)
+            cache.put(files[source], resp)
           )
         )
       )
