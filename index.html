@@ -122,7 +122,7 @@
       </ul>
 
       <div id="content">
-        <h1><span id="file_path">/script.js</span>
+        <h1><a href="#" target="_blank" id="file_path">/script.js</a>
           <small id="file_type">application/javascript</small>
           <a id="file_delete" href="#" class="rm">delete</a>
         </h1>
@@ -270,11 +270,13 @@
       }
       function renderFile(state) {
         if(state.file) {
+          file_path.href = state.file.path
           file_path.innerText = state.file.path
           file_type.innerText = state.file.type
           file_body.value = state.file.body
           file_delete.style.display = 'block'
         } else {
+          file_path.href = '#'
           file_path.innerText = '_'
           file_type.innerText = '_'
           file_body.value = ''
