@@ -9,7 +9,7 @@
     </style>
   </head>
   <body>
-    
+
     <h1>404</h1>
 
     <h2 id="support_notice">Unavailable – service worker support required</h2>
@@ -29,7 +29,12 @@
               // reload is needed
               if(!localStorage.getItem('_registered')) {
                 localStorage.setItem('_registered', true)
-                document.location.reload()
+
+                // wait before reload - would be **way better** to do this
+                // on sw ready, but don't have time just now
+                setTimeout(function(){
+                  document.location.reload()
+                }, 500)
               }
 
             })
