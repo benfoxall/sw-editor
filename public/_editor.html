@@ -331,6 +331,7 @@
                 .then(function(response){
                   response.text()
                     .then(function(text){
+                      console.log(request.url)
 
                       store({
                         action: 'ADD',
@@ -351,7 +352,7 @@
       function relative(url) {
         return url.split(location.origin + '/')
             .filter(function(d) {return d})
-            [0]
+            [0] || '/'
       }
 
 
