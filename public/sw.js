@@ -18,10 +18,10 @@ self.addEventListener('install', function(event) {
         'index.html',
         'script.js',
         'style.css'
-      ].map( file =>
+      ].map( (file, i) =>
         fetch('/_default/' + file)
           .then(resp =>
-            cache.put('/' + file, resp)
+            cache.put('/' + i ? file : '', resp)
           )
         )
       )
